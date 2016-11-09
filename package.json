@@ -1,0 +1,16 @@
+{
+  "name": "fetch",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./"
+  },
+  "dependencies": {
+    "request": "^2.65.0",
+    "slack-terminalize": "^1.0.0"
+  },
+  "author": "TSC",
+  "license": "ISC"
+}
