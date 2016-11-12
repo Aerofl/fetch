@@ -11,9 +11,9 @@ var webClient = require('slack-terminalize').getWebClient();
 var postMessage = function (channel, response, format) {
 
 	format = format || true;
-	response = (format && '```' + response + '```') || response;
+	response = (format && '' + response) || response;
 
-    // more on this API here: https://api.slack.com/methods/chat.postMessage
+  // more on this API here: https://api.slack.com/methods/chat.postMessage
 	webClient.chat.postMessage(channel, response, {
 		as_user: true
 	});
