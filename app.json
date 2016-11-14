@@ -1,0 +1,12 @@
+{
+  "name": "Fetch Bot",
+  "description": "Fetch!",
+  "repository": "https://github.com/Aerofl/fetch",
+  "env": {
+    "SLACK_TOKEN": {
+      "description": "Slack bot RTM API token",
+      "required": false
+    },
+  },
+  "image": "heroku/nodejs"
+}
