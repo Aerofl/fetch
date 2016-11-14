@@ -1,44 +1,57 @@
-var request = require('request'),
-    _ = require('underscore'),
-    util  = require('../util');
+const request = require('request');
+const util  = require('../util');
+const _ = require('underscore');
 
 module.exports = function (param) {
-  var appId = process.env.APP_ID,
-      channel = param.channel,
-      endpoint = param.commandConfig.endpoint.replace('{appId}', appId);
-      args = param.args;
+	const appId = process.env.APP_ID;
+	const channel = param.channel;
+	const endpoint = param.commandConfig.endpoint.replace('{appId}', appId);
+	const args = param.args;
+	const messages = param.commandConfig.messages;
 
-  request(endpoint, function (err, response, body) {
-    var info;
+	let info = [];
+	let arg = args.join(' ');
 
-    if (!err && response.statusCode === 200) {
-      body = JSON.parse(body);
+	arg = arg.toLowerCase();
 
-      body.records.forEach(function(item) {
-        item.fields.questions = item.fields.question.split(',');
-        item.fields.questions = item.fields.questions.map(function(q) {
-          return q.trim();
-        });
-      });
+	if (arg === 'help') {
+		info.push(messages.help);
+		util.postMessage(channel, info);
+	}
 
-      body.records.forEach(function(item) {
-        var match;
-        item.fields.questions.forEach(function(q) {
-          //args = args.join(' ');
-          console.log('args');
-          console.log(args);
-          console.log('q'); //if (q == args) match = q;
-          console.log(q); //if (q == args) match = q;
+	else {
+		request(endpoint, function (err, response, body) {
+			if (!err && response.statusCode === 200) {
+				let questions = [];
+				body = JSON.parse(body);
 
-          if (q == args) return q;
-        });
-      });
+				body.records.forEach(function(item) {
+					item.fields.questions = item.fields.question.split(',').map(function(q) {
+						return q.trim().toLowerCase();
+					});
 
-    }
-    else {
-      info = 'Nothin\' to see here!';
-    }
+					questions.push(item.fields.questions);
 
-    util.postMessage(channel, info);
-  });
+					if (item.fields.questions.includes(arg)) {
+						info.push(item.fields.answer);
+					}
+					else if (arg === 'commands') {
+						item.fields.questions.forEach(function(question) {
+							info.push('\n*fetch* ' + question);
+						});
+					}
+				});
+
+				questions = _.flatten(questions);
+
+				if (!questions.includes(arg) && arg != 'commands') {
+					info.push(messages.mismatch);
+				}
+			}
+			else {
+				info = [messages.error];
+			}
+			util.postMessage(channel, info);
+		});
+	}
 };
