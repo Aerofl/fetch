@@ -16,8 +16,11 @@
   "fetch": {
     "alias": [],
     "endpoint": "https://api.airtable.com/v0/appNP09CjjKqscjRW/questions_and_answers?api_key={appId}",
-    "help": "fetch [query]",
-    "description": "I'll fetch that info for you"
+    "messages": {
+      "error": "Whoops! Something went wrong",
+      "help": "*Fetch Bot* lets you ask questions about Experiences and provides detailed answers. To see a list of commands, try *fetch commands*",
+      "mismatch": "¯\\_(ツ)_/¯\n\nTry *fetch commands*"
+    }
   },
   "error": {
     "exclude": true

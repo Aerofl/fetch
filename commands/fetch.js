@@ -1,19 +1,15 @@
 const request = require('request');
 const util  = require('../util');
+const _ = require('underscore');
 
 module.exports = function (param) {
 	const appId = process.env.APP_ID;
 	const channel = param.channel;
 	const endpoint = param.commandConfig.endpoint.replace('{appId}', appId);
 	const args = param.args;
-	const messages = {
-		api_error: 'Whoops! Something went wrong',
-		help: '*fetch* lets you ask questions about Experiences and provides detailed answers. To see a list of commands, try *fetch commands*',
-		mismatch: '¯\\_(ツ)_/¯ Try *fetch commands*'
-	};
+	const messages = param.commandConfig.messages;
 
 	let info = [];
-	let mismatch = false;
 	let arg = args.join(' ');
 
 	arg = arg.toLowerCase();
@@ -26,15 +22,16 @@ module.exports = function (param) {
 	else {
 		request(endpoint, function (err, response, body) {
 			if (!err && response.statusCode === 200) {
+				let questions = [];
 				body = JSON.parse(body);
 
 				body.records.forEach(function(item) {
 					item.fields.questions = item.fields.question.split(',').map(function(q) {
 						return q.trim().toLowerCase();
 					});
-				});
 
-				body.records.forEach(function(item) {
+					questions.push(item.fields.questions);
+
 					if (item.fields.questions.includes(arg)) {
 						info.push(item.fields.answer);
 					}
@@ -43,17 +40,16 @@ module.exports = function (param) {
 							info.push('\n*fetch* ' + question);
 						});
 					}
-					else if (!item.fields.questions.includes(arg)) {
-						mismatch = true
-					}
 				});
 
-				if (mismatch === true) {
+				questions = _.flatten(questions);
+
+				if (!questions.includes(arg) && arg != 'commands') {
 					info.push(messages.mismatch);
 				}
 			}
 			else {
-				info = [messages.api_error];
+				info = [messages.error];
 			}
 			util.postMessage(channel, info);
 		});
